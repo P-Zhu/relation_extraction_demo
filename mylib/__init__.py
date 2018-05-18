@@ -1,0 +1,1 @@
+from mylib.use_ltp  import myLTP
