@@ -151,7 +151,7 @@ class myLTP:
 		return res
 
 	def get_dne(self,text):
-		"""获取实体对"""
+		"""获取实体对，人名(Nh)地名(Ns)机构名(Ni)"""
 		res = []
 		sentences = self.split_sentence(text)
 		for sentence in sentences:
