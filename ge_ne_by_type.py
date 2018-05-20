@@ -11,6 +11,9 @@ def find_dne(txt_file,csv_file,ltp):
 			for line in file_in:
 				rs=ltp.get_dne(line)
 				for (type1,start1,end1),(type2,start2,end2),words in rs:
+					d = min(abs(start1 - end2),abs(start2 - end1))
+					if d > 6: # 当实体距离大于6
+						continue
 					loc1 = (start1,end1)
 					loc2 = (start2,end2)
 					ne1 = ''.join(words[start1:end1])
