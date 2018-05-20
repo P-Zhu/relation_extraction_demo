@@ -128,6 +128,6 @@ def adding_baidu_result_num():
 
 
 if __name__ == "__main__":
-	# prepare_file()
+	prepare_file()
 	# distance_supervision()
-	adding_baidu_result_num()
+	# adding_baidu_result_num()

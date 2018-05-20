@@ -67,6 +67,8 @@ class MyWord2Vec:
 			return self._pharse_embedding(word)
 
 	def words_embedding(self,words):
+		if not words:
+			return np.zeros(self.size)
 		vec= []
 		for word in words:
 			v = self.word_embedding(word)

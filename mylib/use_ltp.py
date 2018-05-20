@@ -162,10 +162,15 @@ class myLTP:
 
 if __name__ == "__main__":
 	
-	text = '《你好》和《你好》约翰·克林顿，北京师范大学出版社编辑部'
 	myltp = myLTP(r'../../../../../../../../../_mass/ltp-model')
-	myltp.load([1,1,1,0,0])
-	res = myltp._get_ne_for_sentence(text)
-	print (res)
+	myltp.load([1,1,1,1,0])
+	
+	words = ['①', '张德坚', '初撰', '《贼情集要》', '，', '后', '至', '曾', '国藩', '所', '设', '采编', '所', '，', '一八五五', '年', '成', '《贼情汇纂》', '。']
+	postags = myltp.pos_tag(words)
+	res = myltp.parse(words,postags)
+	res = list(res)
+	for i in range(len(res)):
+		print (res[i].head,res[i].relation)
+	print (i,len(words))
 	myltp.release()
 
