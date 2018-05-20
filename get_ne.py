@@ -62,7 +62,7 @@ def class_dne_by_type(csv_dir,new_dir):
 
 
 if __name__ == "__main__":
-	myltp = myLTP(r'../../../../../../../../_mass/ltp-model','mylib/pattern.txt')
+	myltp = myLTP(r'../ltp-model','mylib/pattern.txt')
 	myltp.load([1,1,1,0,0])
 	find_dne_for_dir('data/txt/','data/dne/',myltp)
 	class_dne_by_type('data/dne/','data/dne/by_type/')
