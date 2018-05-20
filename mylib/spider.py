@@ -249,7 +249,14 @@ def baidu_result_num(key):
 
 
 if __name__=="__main__":
-	print (find_author('谢张两监察委员与鲍罗庭问答纪要','邓泽如'))
-	
+	import math
+	for p,b in (('李大钊','《社会革命底商榷》'),
+				('毛泽东','《唯心历史观的破产》')):
+		r1 = baidu_result_num(p)
+		r2 = baidu_result_num(b)
+		r3 = baidu_result_num("%s %s 作者"%(p,b))
+		print (math.log(r1+1,10))
+		print (math.log(r2+1,10))
+		print (math.log(r3+1,10))
 
 
