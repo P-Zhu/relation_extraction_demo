@@ -149,7 +149,9 @@ def find_author_by_title(book,person):
 		h3text = cp2ep(h3.find('a').get_text())
 		if re.findall(r''+person+'[的:： \-]?[《]?'+book+'[》_ ]',h3text) or \
 			   re.findall(r'[《]?'+book+'[》_ ]'+person,h3text):
-				count += 1
+			if '百度图片' not in h3text: # 避免出现这样的标题：梁启超 新民丛刊_百度图片
+				if '百度学术' not in h3text: # 避免出现这样的标题：陆兵 《北京党史》_相关论文(共26篇)_百度学术
+					count += 1
 	sum_=len(h3s)
 	if len(h3s) in (0,1):
 		# print ('h3s',book,person)
@@ -225,10 +227,11 @@ def find_author(book,person):
 	for i in range(len(funs)):
 		author = funs[i](book)
 		authors.append([author,weight[i]])
-	try:
-		authors.append(find_author_by_title(book,person))
-	except: # 可能会出现正则的错误
-		pass
+	print (authors)
+	# try: #
+	# 	authors.append(find_author_by_title(book,person))
+	# except: # 可能会出现正则的错误
+	# 	pass
 	for i in range(len(authors)):
 		if type(authors[i][0]) != int:
 			if t2s(person) in t2s(authors[i][0]):
@@ -237,7 +240,7 @@ def find_author(book,person):
 				authors[i][0] = -1
 	
 	author = sum([a*w for a,w in authors])
-	return author
+	return authors,author
 	
 
 def baidu_result_num(key):
@@ -249,14 +252,16 @@ def baidu_result_num(key):
 
 
 if __name__=="__main__":
-	import math
-	for p,b in (('李大钊','《社会革命底商榷》'),
-				('毛泽东','《唯心历史观的破产》')):
-		r1 = baidu_result_num(p)
-		r2 = baidu_result_num(b)
-		r3 = baidu_result_num("%s %s 作者"%(p,b))
-		print (math.log(r1+1,10))
-		print (math.log(r2+1,10))
-		print (math.log(r3+1,10))
+	r = find_author('《第二次世界大战回忆录》','老舍.')
+	print (r)
+	# import math
+	# for p,b in (('李大钊','《社会革命底商榷》'),
+	# 			('毛泽东','《唯心历史观的破产》')):
+	# 	r1 = baidu_result_num(p)
+	# 	r2 = baidu_result_num(b)
+	# 	r3 = baidu_result_num("%s %s 作者"%(p,b))
+	# 	print (math.log(r1+1,10))
+	# 	print (math.log(r2+1,10))
+	# 	print (math.log(r3+1,10))
 
 

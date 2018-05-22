@@ -64,7 +64,7 @@ class spider_thread2(threading.Thread):
 				math.log(book_result_num+1,10),
 				math.log(author_result_num+1,10),
 				))
-			print(self.row,author_result_num,'%s %s 作者'%(person,book))
+			# print(self.row,author_result_num,'%s %s 作者'%(person,book))
 			self.writer.writerow(self.row)
 		except (#urllib.error.HTTPError,
 			    #urllib.error.URLError,

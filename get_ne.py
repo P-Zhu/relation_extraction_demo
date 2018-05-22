@@ -18,7 +18,7 @@ def find_dne(txt_file,csv_file,ltp):
 					loc2 = (start2,end2)
 					ne1 = ''.join(words[start1:end1])
 					ne2 = ''.join(words[start2:end2])
-					new_list=(type1,type2,loc1,loc2,ne1,ne2,words)
+					new_list=(type1,type2,loc1,loc2,ne1,ne2,words,txt_file.split("/")[-1])
 					writer.writerow(new_list)
 
 
@@ -48,11 +48,11 @@ def class_dne_by_type(csv_dir,new_dir):
 			for row in reader:
 				if not row:
 					continue
-				type1,type2,loc1,loc2,ne1,ne2,words = row
+				type1,type2,loc1,loc2,ne1,ne2,words,source = row
 				if type2 > type1:
 					loc1,loc2 = loc2,loc1
 					ne1, ne2  = ne1, ne2
-				new_list = [ne1,ne2,words,loc1,loc2]
+				new_list = [ne1,ne2,words,loc1,loc2,source]
 				dne_by_type[(type1,type2)].append(new_list)
 
 	for type_,dnes in dne_by_type.items():
@@ -64,7 +64,7 @@ def class_dne_by_type(csv_dir,new_dir):
 if __name__ == "__main__":
 	myltp = myLTP(r'../ltp-model','mylib/pattern.txt')
 	myltp.load([1,1,1,0,0])
-	find_dne_for_dir('data/txt/','data/dne/',myltp)
+	# find_dne_for_dir('data/txt/','data/dne/',myltp)
 	class_dne_by_type('data/dne/','data/dne/by_type/')
 	myltp.release()
 

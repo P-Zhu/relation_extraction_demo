@@ -1,5 +1,6 @@
 import os
 import re
+import jieba
 from collections import defaultdict
 from itertools import combinations
 from pyltp import SentenceSplitter,\
@@ -92,8 +93,9 @@ class myLTP:
 		return SentenceSplitter.split(text)
 
 	def word_segment(self,sentence):
-		"""分词"""
-		words = self.segmentor.segment(sentence)
+		"""使用结巴分词"""
+		# words = self.segmentor.segment(sentence)
+		words = jieba.cut(sentence)
 		return words
 
 	def pos_tag(self,words):
