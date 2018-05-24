@@ -4,3 +4,4 @@ from mylib.langconv import *
 from mylib.word2vec import MyWord2Vec
 from mylib.vectorization import Vectorization
 from mylib.base_tech import mySKF
+from mylib.tsvm import TSVM

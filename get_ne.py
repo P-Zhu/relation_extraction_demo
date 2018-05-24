@@ -3,12 +3,15 @@ import csv
 import os
 from collections import defaultdict
 
+
+
 def find_dne(txt_file,csv_file,ltp):
 	"""找到文本中的实体对，并输出到csv文件中"""
 	with open(txt_file,encoding='utf-8') as file_in:
 		with open(csv_file,'w+',newline='',encoding='utf-8') as file_out:
 			writer = csv.writer(file_out)
 			for line in file_in:
+				line = line.replace('　',' ')
 				rs=ltp.get_dne(line)
 				for (type1,start1,end1),(type2,start2,end2),words in rs:
 					d = min(abs(start1 - end2),abs(start2 - end1))
@@ -32,7 +35,7 @@ def find_dne_for_dir(txt_dir,csv_dir,ltp):
 		print (txt_file)
 		find_dne(txt_file,csv_file,ltp)
 
-
+ 
 def class_dne_by_type(csv_dir,new_dir):
 	"""按照实体对的类型，写入不同的文件中"""
 	if not os.path.isdir(new_dir):
@@ -63,8 +66,8 @@ def class_dne_by_type(csv_dir,new_dir):
 
 if __name__ == "__main__":
 	myltp = myLTP(r'../ltp-model','mylib/pattern.txt')
-	myltp.load([1,1,1,0,0])
-	# find_dne_for_dir('data/txt/','data/dne/',myltp)
+	myltp.load([0,1,1,0,0])
+	find_dne_for_dir('data/txt/','data/dne/',myltp)
 	class_dne_by_type('data/dne/','data/dne/by_type/')
 	myltp.release()
 

@@ -50,6 +50,13 @@ def context_equal(w1,w2):
 def t2s(text):
 	return Converter('zh-hans').convert(text)
 
+def context_in(p1,p2):
+	p1 = t2s(p1)
+	p2 = ts2(p2)
+	
+	
+
+
 def download(url,args={}):
 	# random_header = random.choice(my_headers)
 	# if args:
@@ -186,9 +193,9 @@ def find_author_by_wenjin(book):
 			return author[0].replace('\n\t\t','').replace('\n','')
 	return 0
 
-journal_tags = ["期刊",'报纸','电视剧']
+journal_tags = ['报纸','电视剧']
 journal_info = ['创刊地点','创刊时间','制定者']
-author_mark = ['作者','编撰者','主要编撰者','发表人物']
+author_mark = ['作者','编撰者','主要编撰者','发表人物','发布者']
 def find_author_by_baike(book):
 	urls=to_baike_url(book)
 	for url in urls:
@@ -227,11 +234,8 @@ def find_author(book,person):
 	for i in range(len(funs)):
 		author = funs[i](book)
 		authors.append([author,weight[i]])
-	print (authors)
-	# try: #
-	# 	authors.append(find_author_by_title(book,person))
-	# except: # 可能会出现正则的错误
-	# 	pass
+	print(authors)
+	
 	for i in range(len(authors)):
 		if type(authors[i][0]) != int:
 			if t2s(person) in t2s(authors[i][0]):
@@ -240,8 +244,7 @@ def find_author(book,person):
 				authors[i][0] = -1
 	
 	author = sum([a*w for a,w in authors])
-	return authors,author
-	
+	return author
 
 def baidu_result_num(key):
 	html = download(baidu_search_uri(key))
@@ -252,7 +255,7 @@ def baidu_result_num(key):
 
 
 if __name__=="__main__":
-	r = find_author('《第二次世界大战回忆录》','老舍.')
+	r = find_author('《易卜生主义》','顾颉')
 	print (r)
 	# import math
 	# for p,b in (('李大钊','《社会革命底商榷》'),

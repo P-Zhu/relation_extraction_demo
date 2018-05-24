@@ -78,6 +78,8 @@ class MyWord2Vec:
 	def _pharse_embedding(self,pharse):
 		# 为防止循环调用，设置此方法
 		words = cut(pharse).split()
+		if not words:
+			return np.zeros(self.size)
 		vec= []
 		for word in words:
 			v = self[word]

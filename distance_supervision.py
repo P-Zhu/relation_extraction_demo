@@ -13,7 +13,6 @@ import shutil
 
 
 
-
 class spider_thread(threading.Thread):
 	"""find_author"""
 	def __init__(self,row,writer,count=1):
@@ -103,9 +102,13 @@ def distance_supervision():
 					time.sleep(3)
 				s_thread = spider_thread(row,writer)
 				s_thread.start()
+			t = 0
 			while threading.activeCount()>1:
 				print ("线程未全部结束，等待 1 秒；还有 %d 个线程"%(threading.activeCount()-1))
 				time.sleep(1)
+				t += 1
+				if t > 60:
+					break
 
 def adding_baidu_result_num():
 	csv_file1 = 'data/dne/book_person/book_person_ds.csv'
@@ -122,9 +125,13 @@ def adding_baidu_result_num():
 					time.sleep(3)
 				s_thread = spider_thread2(row,writer)
 				s_thread.start()
+			t = 0
 			while threading.activeCount()>1:
 				print ("线程未全部结束，等待 1 秒；还有 %d 个线程"%(threading.activeCount()-1))
 				time.sleep(1)
+				t += 0
+				if t > 60:
+					break
 
 
 if __name__ == "__main__":

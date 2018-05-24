@@ -1,2 +1,4 @@
 /data/w2v/
 *.pyc
+/data/dne/dataset/dataset.csv
+/mylib/svm_light_windows64/data/
