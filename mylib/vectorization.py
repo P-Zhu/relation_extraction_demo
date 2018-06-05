@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 
 # pos_str = 'a b c d e g h i j k m n nd nh ni nl ns nt nz o p q r u v wp ws x z'
@@ -17,14 +18,17 @@ parse_dic = {'SBV': 0, 'VOB': 1, 'IOB': 2, 'FOB': 3,
 class Vectorization:
 	"""
 	特征：
-		1.实体本身 
-		2.实体的词性
-		3.实体的上下文
-		4.上下文的词性
-		5.实体间的距离
-		6.实体的相对位置
-		7.搜索相似度
-		8.句法分析
+		1.实体本身     128 * 2
+		2.实体的长度   1 * 2
+		-------------
+		3.实体的上下文 128 * 3
+		4.上下文的词性 30 * 3
+		-------------
+		5.实体间的距离   1
+		6.实体的相对位置 1
+		7.句法分析       15 * 2
+		-------------
+		8.点互信息       3
 	"""
 	def __init__(self,loc1,loc2,words,se1,se2,se3,w2v,ltp,window=2):
 		self.loc1 = loc1
@@ -37,107 +41,105 @@ class Vectorization:
 		self.se2 = se2
 		self.se3 = se3
 
-		start1,end1 = loc1
-		start2,end2 = loc2
-
-		self.ne1 = ''.join(words[start1:end1])
-		self.ne2 = ''.join(words[start2:end2])
 		self.pos = self._get_pos()
 		self.arcs = self._get_arcs()
-		
-		self.ne_vec1 = self._build_ne_vec(self.ne1)
-		self.ne_vec2 = self._build_ne_vec(self.ne2)
-		self.ne_pos_vec1 = self._build_ne_pos_vec(loc1)
-		self.ne_pos_vec2 = self._build_ne_pos_vec(loc2)
-		self.ne_arcs_vec1 = self._build_ne_arcs_vec(loc1)
-		self.ne_arcs_vec2 = self._build_ne_arcs_vec(loc2)
 
-		context_indexs1 = self._get_context_indexs(loc1,loc2)
-		context_indexs2 = self._get_context_indexs(loc2,loc1)
-		self.context_vec1 = self._build_context_vec(context_indexs1)
-		self.context_vec2 = self._build_context_vec(context_indexs2)
-		self.context_pos_vec1 = self._build_context_pos_vec(context_indexs1)
-		self.context_pos_vec2 = self._build_context_pos_vec(context_indexs2)
+	def words_embedding(self,words):
+		return self.w2v.words_embedding(words)
 
-		self.distance = self._get_distance()
-		self.relative_position = self._get_relative_position()
-
-	def _get_context_indexs(self,loc,other_loc):
-		"""获取一个实体的上下文"""
-		context_indexs = []
-		start,end = loc
-		_star,_en = other_loc
-		for i in range(len(self.words)):
-			if abs(i-start)<=self.window or abs(i-end-1)<=self.window:
-				if (not start<=i<end) and (not _star<=i<_en):
-					context_indexs.append(i)
-		return context_indexs
-
-	def _get_pos(self):
-		return self.ltp.pos_tag(self.words)
-
-	def _get_arcs(self):
-		return self.ltp.parse(self.words, self.pos)
-
-	def _build_ne_vec(self,ne):
-		return self.w2v.word_embedding(ne)
-
-	def _build_ne_pos_vec(self,loc):
-		pos_vec = [0 for i in range(29)]
-		start,end = loc
-		for i in range(start,end):
-			index = pos_dic[self.pos[i]]
+	def pos_embedding(self,postags):
+		pos_vec = [0 for i in range(30)]
+		for pos in postags:
+			index = pos_dic[pos]
 			pos_vec[index] += 1
 		return pos_vec
 
-	def _build_ne_arcs_vec(self,loc):
+	def arc_embedding(self,arcs):
 		arcs_vec = [0 for i in range(15)]
 		arcs = list(self.arcs)
-		start,end = loc
-		for i in range(start,end):
-			index = parse_dic[arcs[i].relation]
+		for arc in arcs:
+			index = parse_dic[arc.relation]
 			arcs_vec[index] += 1
 		return arcs_vec
 
-	def _build_context_vec(self,context_indexs):
-		context = [self.words[index] for index in context_indexs]
-		return self.w2v.words_embedding(context)
+	def entity_feature(self,loc):
+		start,end = loc
+		ne_words = self.words[start:end]
+		ne_vec  = self.words_embedding(ne_words)
+		length = len(''.join(ne_words))
+		return ne_vec,length
 
-	def _build_context_pos_vec(self,context_indexs):
-		pos_vec = [0 for i in range(30)]
-		for i in context_indexs:
-			index = pos_dic[self.pos[i]]
-			pos_vec[index] += 1
-		return pos_vec
+	def find_context(self):
+		context_pre  = []
+		context_mid  = []
+		context_post = []
+		start1,end1 = self.loc1
+		start2,end2 = self.loc2 
+		if start1>start2:
+			start1,start2 = start2,start1
+			end1,end2 = end2,end1
+		for i in range(len(self.words)):
+			if start1-self.window<=i<start1:
+				context_pre.append(i)
+			elif end1<=i<start2:
+				context_mid.append(i)
+			elif end2<=i<end2+self.window:
+				context_post.append(i)
+		return context_pre,context_mid,context_post
+				
+	def context_feature(self,context):
+		context_words = [self.words[index] for index in context]
+		context_pos   = [self.pos[index] for index in context]
+		
+		context_vec  = self.words_embedding(context_words)
+		pos_vec = self.pos_embedding(context_pos)
+		return context_vec,pos_vec
 
-	def _get_distance(self):
-		# [s1,e1] [s2,e2]
+	def sentence_feature(self):
 		start1,end1 = self.loc1
 		start2,end2 = self.loc2
-		return min(abs(start1 - end2),abs(start2 - end1))
+		d = min(abs(start1 - end2),abs(start2 - end1))
+		rp = int(start1<end2) # 相对位置
 
-	def _get_relative_position(self):
-		# [s1,e1] [s2,e2]
-		start1,end1 = self.loc1
-		start2,end2 = self.loc2
-		if start1<end2:
-			return 1
-		else:
-			return -1
+		arc1 = self.arcs[start1:end1]
+		arc2 = self.arcs[start2:end2]
+		arc_vec1 = self.arc_embedding(arc1)
+		arc_vec2 = self.arc_embedding(arc2)
+		
+		return d,rp,arc_vec1,arc_vec2
+
+	def _get_pos(self):
+		start,end = self.loc2
+		words = copy.deepcopy(self.words)
+		words[start:end] = '书'
+		return self.ltp.pos_tag(words)
+
+	def _get_arcs(self):
+		start,end = self.loc2
+		words = copy.deepcopy(self.words)
+		words[start:end] = '书'
+		return self.ltp.parse(words, self.pos)
 
 	def vec(self):
-		return np.concatenate((self.ne_vec1,
-				self.ne_vec2,
-				self.ne_pos_vec1,
-				self.ne_pos_vec2,
-				self.ne_arcs_vec1,
-				self.ne_arcs_vec2,
-				self.context_vec1,
-				self.context_vec2,
-				self.context_pos_vec1,
-				self.context_pos_vec2,
-				[self.distance,self.relative_position,
-				 self.se1,self.se2,self.se3]))
+		ne_vec1,length1 = self.entity_feature(self.loc1)
+		ne_vec2,length2 = self.entity_feature(self.loc2)
+
+		c1,c2,c3 = self.find_context()
+		c_vec1,pos_vec1 = self.context_feature(c1)
+		c_vec2,pos_vec2 = self.context_feature(c2)
+		c_vec3,pos_vec3 = self.context_feature(c3)
+
+		self.d,self.rp,arc_vec1,arc_vec2 = self.sentence_feature()
+		return np.concatenate((ne_vec1,ne_vec2,
+					c_vec1,c_vec2,c_vec3,
+					pos_vec1,pos_vec2,pos_vec3,
+					arc_vec1,arc_vec2,
+					(length1,length2,self.d,self.rp,
+					 self.se1,self.se2,self.se3)))
+
+	def pvec(self):
+		return self.vec(),self.pos_tag,self.arcs,self.d,self.rp
+
 
 
 if __name__ == "__main__":

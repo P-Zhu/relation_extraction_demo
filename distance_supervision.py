@@ -52,18 +52,20 @@ class spider_thread2(threading.Thread):
 
 	def run(self):
 		if self.count > 10:
+			self.row.extend((0,0,0))
+			self.writer.writerow(self.row)
 			print ('超过错误次数，线程退出：',self.row[:2])
 			return 
 		person,book = self.row[1:3]
 		try:
 			person_result_num = baidu_result_num(person)
 			book_result_num = baidu_result_num(book)
-			author_result_num = baidu_result_num("%s %s 作者"%(person,book))
+			joint_num1 = baidu_result_num("%s %s"%(person,book))
+			joint_num2 = baidu_result_num("%s %s"%(book,person))
 			self.row.extend((math.log(person_result_num+1,10),
 				math.log(book_result_num+1,10),
-				math.log(author_result_num+1,10),
+				(math.log(joint_num1+1,10)*math.log(joint_num1+1,10))**0.5,
 				))
-			# print(self.row,author_result_num,'%s %s 作者'%(person,book))
 			self.writer.writerow(self.row)
 		except (#urllib.error.HTTPError,
 			    #urllib.error.URLError,
@@ -111,8 +113,8 @@ def distance_supervision():
 					break
 
 def adding_baidu_result_num():
-	csv_file1 = 'data/dne/book_person/book_person_ds.csv'
-	csv_file2 = 'data/dne/book_person/book_person_ds2.csv'
+	csv_file1 = 'data/dne/book_person/book_person.csv'
+	csv_file2 = 'data/dne/book_person/book_person2.csv'
 	with open(csv_file1,newline="",encoding='utf8') as file_input:
 		with open(csv_file2,'w+',newline='',encoding='utf-8') as file_output:
 			reader = csv.reader(file_input)
@@ -129,12 +131,12 @@ def adding_baidu_result_num():
 			while threading.activeCount()>1:
 				print ("线程未全部结束，等待 1 秒；还有 %d 个线程"%(threading.activeCount()-1))
 				time.sleep(1)
-				t += 0
-				if t > 60:
+				t += 1
+				if t > 600:
 					break
 
 
 if __name__ == "__main__":
-	prepare_file()
+	# prepare_file()
 	# distance_supervision()
-	# adding_baidu_result_num()
+	adding_baidu_result_num()

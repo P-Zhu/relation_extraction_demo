@@ -96,7 +96,7 @@ class myLTP:
 		"""使用结巴分词"""
 		# words = self.segmentor.segment(sentence)
 		words = jieba.cut(sentence)
-		return words
+		return list(words)
 
 	def pos_tag(self,words):
 		"""词性标注"""
@@ -140,7 +140,7 @@ class myLTP:
 				for index,word in enumerate(words):
 					if word == ner_type:
 						words[index] = v.__next__()
-						res['ners'].append((ner_type,index,index+1))
+						res['ners'].append([ner_type,index,index+1])
 		return res
 
 	def _get_dne_for_sentence(self,sentence):
@@ -168,11 +168,13 @@ if __name__ == "__main__":
 	myltp.load([1,1,1,1,0])
 	
 	words = ['①', '张德坚', '初撰', '《贼情集要》', '，', '后', '至', '曾', '国藩', '所', '设', '采编', '所', '，', '一八五五', '年', '成', '《贼情汇纂》', '。']
+	s = '如著有《阅读红楼梦随笔》而开红学研究之先河的周春，自然成为王国维后来写B的引路人。'
+	words = myltp._get_ne_for_sentence(s)['words']
 	postags = myltp.pos_tag(words)
 	res = myltp.parse(words,postags)
 	res = list(res)
 	for i in range(len(res)):
-		print (res[i].head,res[i].relation)
+		print (words[i],res[i].head,res[i].relation)
 	print (i,len(words))
 	myltp.release()
 

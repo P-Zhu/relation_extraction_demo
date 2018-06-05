@@ -143,28 +143,27 @@ def to_baike_url(word):
 	return [link['href'] for link in links[:5]]
 
 
-def find_author_by_title(book,person):
-	book = remove_punc(book)
-	url  = baidu_search_uri(person+' '+book)
-	# print(url)
-	html = download(url)
-	soup = BeautifulSoup(html,'html.parser')# t c-gap-bottom-small
-	h3s  = soup.find_all('h3',class_="t")
-	count = 0
-	# print (len(h3s))
-	for h3 in h3s:
-		h3text = cp2ep(h3.find('a').get_text())
-		if re.findall(r''+person+'[的:： \-]?[《]?'+book+'[》_ ]',h3text) or \
-			   re.findall(r'[《]?'+book+'[》_ ]'+person,h3text):
-			if '百度图片' not in h3text: # 避免出现这样的标题：梁启超 新民丛刊_百度图片
-				if '百度学术' not in h3text: # 避免出现这样的标题：陆兵 《北京党史》_相关论文(共26篇)_百度学术
-					count += 1
-	sum_=len(h3s)
-	if len(h3s) in (0,1):
-		# print ('h3s',book,person)
-		return 1,0
-	return 1,math.log(count+1,sum_)
-	
+# def find_author_by_title(book,person):
+# 	book = remove_punc(book)
+# 	url  = baidu_search_uri(person+' '+book)
+# 	# print(url)
+# 	html = download(url)
+# 	soup = BeautifulSoup(html,'html.parser')# t c-gap-bottom-small
+# 	h3s  = soup.find_all('h3',class_="t")
+# 	count = 0
+# 	# print (len(h3s))
+# 	for h3 in h3s:
+# 		h3text = cp2ep(h3.find('a').get_text())
+# 		if re.findall(r''+person+'[的:： \-]?[《]?'+book+'[》_ ]',h3text) or \
+# 			   re.findall(r'[《]?'+book+'[》_ ]'+person,h3text):
+# 			if '百度图片' not in h3text: # 避免出现这样的标题：梁启超 新民丛刊_百度图片
+# 				if '百度学术' not in h3text: # 避免出现这样的标题：陆兵 《北京党史》_相关论文(共26篇)_百度学术
+# 					count += 1
+# 	sum_=len(h3s)
+# 	if len(h3s) in (0,1):
+# 		# print ('h3s',book,person)
+# 		return 1,0
+# 	return 1,math.log(count+1,sum_)
 
 
 
@@ -250,12 +249,15 @@ def baidu_result_num(key):
 	html = download(baidu_search_uri(key))
 	soup = BeautifulSoup(html,'html.parser')
 	node = soup.find('div',class_="nums")
-	num  = node.get_text()[15:-1].replace(',','')
-	return int(num)
+	if node:
+		num  = node.get_text()[15:-1].replace(',','')
+		return int(num)
+	else:
+		return 0
 
 
 if __name__=="__main__":
-	r = find_author('《易卜生主义》','顾颉')
+	r = find_author('丽人行','毛泽东')
 	print (r)
 	# import math
 	# for p,b in (('李大钊','《社会革命底商榷》'),
